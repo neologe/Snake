@@ -53,7 +53,7 @@ show('<h1>SNAKE</h1><button class="b" onclick="start()">PLAY</button><button cla
 function board(back){let rows='';for(let i=0;i<10;i++){const e=scores[i];rows+=`<tr><td>${i+1}.</td><td>${e?e.n:'---'}</td><td>${e?e.s:'0'}</td></tr>`}
 show('<div>TOP 10</div><table>'+rows+'</table><button class="b" onclick="title()">BACK</button>')}
 function start(){hide();snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};q=[];score=0;saved=false;place();run=true;hud();clearInterval(tm);tm=setInterval(step,speed());draw()}
-const speed=()=>Math.max(60,140-Math.floor(score/50)*8);
+const speed=()=>Math.max(100,200-Math.floor(score/50)*6);
 function place(){do{food={x:Math.floor(Math.random()*C),y:Math.floor(Math.random()*R)}}while(snake.some(s=>s.x==food.x&&s.y==food.y))}
 function turn(x,y){if(!run)return;const l=q.length?q[q.length-1]:dir;if(l.x==-x&&l.y==-y||l.x==x&&l.y==y)return;if(q.length<3)q.push({x,y})}
 function step(){if(q.length)dir=q.shift();const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
