@@ -4,82 +4,102 @@
 <title>Snake</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-:root{--body:#d8dde3;--shell:#3c4a5c;--lcd:#9bb18a;--ink:#1d2b1d;--ghost:rgba(29,43,29,.09);
+:root{--bg:#000;--fg:#fff;--yellow:#ffe14d;--pink:#ff4fa3;--cyan:#38e8ff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--body:#14181d;--shell:#2a3441}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--fg:#fff}}
+:root[data-theme="dark"]{--bg:#000;--fg:#fff}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-body{margin:0;height:100%;background:var(--body);display:flex;justify-content:center;font-family:'Press Start 2P','Courier New',monospace;color:var(--ink);overflow:hidden}
-#app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column;padding:10px;gap:10px}
-#shell{background:var(--shell);border-radius:22px;padding:14px;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
-#brand{color:#c9d3df;font-size:10px;text-align:center;letter-spacing:3px}
-#lcd{position:relative;background:var(--lcd);border-radius:6px;border:3px solid #0006;flex:1;min-height:0;display:flex;flex-direction:column;padding:8px;box-shadow:inset 0 0 18px #0004}
-#hud{display:flex;justify-content:space-between;font-size:10px;padding:2px 2px 6px;border-bottom:2px solid var(--ink);margin-bottom:6px}
-#wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-canvas{max-width:100%;max-height:100%;aspect-ratio:18/20;border:2px solid var(--ink);touch-action:none;image-rendering:pixelated}
-#ov{position:absolute;inset:0;background:var(--lcd);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;text-align:center;font-size:11px;line-height:1.6;border-radius:4px}
-#ov h1{font-size:22px;margin:0;letter-spacing:2px}
-.b{font:inherit;font-size:11px;background:transparent;color:var(--ink);border:3px solid var(--ink);padding:10px 14px;min-width:170px;cursor:pointer}
-.b:active{background:var(--ink);color:var(--lcd)}
-table{width:100%;font-size:10px;border-collapse:collapse}td{padding:3px 4px}td:last-child{text-align:right}
-input{font:inherit;font-size:14px;width:7em;text-align:center;background:transparent;border:3px solid var(--ink);color:var(--ink);padding:6px;text-transform:uppercase}
-#pad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,52px);gap:6px;width:200px;margin:0 auto}
-#pad button{background:#52627a;color:#e6ecf3;border:0;border-radius:12px;font-size:20px}
-#pad button:active{background:#6f82a0}
-#u{grid-column:2}#l{grid-column:1;grid-row:2}#d{grid-column:2;grid-row:2}#r{grid-column:3;grid-row:2}
+body{margin:0;height:100%;background:var(--bg);color:var(--fg);display:flex;justify-content:center;font-family:'Press Start 2P','Courier New',monospace;overflow:hidden}
+#app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column;padding:10px 12px 14px;gap:10px}
+#hud{display:flex;justify-content:space-between;font-size:11px;text-shadow:0 0 8px currentColor}
+#sc{color:var(--yellow)}#hi{color:var(--pink)}
+#stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+canvas{max-width:100%;max-height:100%;aspect-ratio:18/20;border:3px solid #7a3cff;border-radius:14px;box-shadow:0 0 18px #7a3cff99,inset 0 0 18px #7a3cff55;touch-action:none}
+#ov{position:absolute;inset:0;background:rgba(0,0,0,.84);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:14px;text-align:center;font-size:11px;line-height:1.7;border-radius:14px}
+#ov h1{font-size:24px;margin:0;background:linear-gradient(90deg,#ff3b3b,#ffe14d,#3bd16f,#38e8ff,#b45cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.b{font:inherit;font-size:11px;color:#fff;border:0;border-radius:999px;padding:13px 18px;min-width:190px;cursor:pointer;text-shadow:0 2px 0 #0006;box-shadow:0 6px 0 var(--d),0 8px 14px #0008;background:linear-gradient(var(--l),var(--c))}
+.b:active{transform:translateY(5px);box-shadow:0 1px 0 var(--d)}
+.g{--l:#6dff9a;--c:#1fbf55;--d:#0e7a33}.o{--l:#ffc14d;--c:#ff8a00;--d:#a85500}.p{--l:#c98bff;--c:#8a3cff;--d:#531bb0}.r{--l:#ff7a7a;--c:#e62b2b;--d:#8f1313}
+table{width:100%;font-size:10px;border-collapse:collapse}td{padding:4px}td:last-child{text-align:right}
+input{font:inherit;font-size:16px;width:6em;text-align:center;background:#111;border:3px solid var(--cyan);border-radius:10px;color:var(--cyan);padding:8px;text-transform:uppercase}
+#pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:4px;justify-content:center}
+#pad button{border:0;border-radius:50%;font-size:22px;color:#fff;text-shadow:0 2px 0 #0007;background:radial-gradient(circle at 35% 28%,var(--l),var(--c) 62%);box-shadow:0 6px 0 var(--d),0 0 0 3px #222,0 9px 12px #000a}
+#pad button:active{transform:translateY(5px);box-shadow:0 1px 0 var(--d),0 0 0 3px #222}
+#u{grid-column:2;grid-row:1;--l:#ff8a8a;--c:#e62b2b;--d:#8f1313}
+#l{grid-column:1;grid-row:2;--l:#fff08a;--c:#f2c200;--d:#9a7b00}
+#r{grid-column:3;grid-row:2;--l:#8affb0;--c:#1fbf55;--d:#0e7a33}
+#d{grid-column:2;grid-row:3;--l:#8ad0ff;--c:#1f7bff;--d:#0e4aa8}
 </style></head><body>
 <div id="app">
-<div id="shell"><div id="brand">NOKIA</div>
-<div id="lcd">
 <div id="hud"><span id="sc">SCORE 0</span><span id="hi">HI 0</span></div>
-<div id="wrap"><canvas id="cv" width="360" height="400"></canvas></div>
-<div id="ov"></div>
-</div></div>
-<div id="pad"><button id="u">▲</button><button id="l">◀</button><button id="d">▼</button><button id="r">▶</button></div>
+<div id="stage"><canvas id="cv" width="360" height="400"></canvas><div id="ov"></div></div>
+<div id="pad"><button id="u">▲</button><button id="l">◀</button><button id="r">▶</button><button id="d">▼</button></div>
 </div>
 <script>
 const C=18,R=20,S=20,cv=document.getElementById('cv'),g=cv.getContext('2d'),ov=document.getElementById('ov');
-const INK='#1d2b1d',GH='rgba(29,43,29,.09)';
-let snake,dir,q,food,score,tm,run=false,blink=0,tick=0,saved=false;
+const FRUIT=['#ff3b3b','#ff9f1c','#b45cff','#ffe14d','#3bd16f'];
+let snake,dir={x:1,y:0},q=[],food,score=0,tm,run=false,tick=0,dead=false,parts=[],fruit=0;
 function load(){try{const a=JSON.parse(localStorage.getItem('snake_hs'));return Array.isArray(a)?a:[]}catch(e){return[]}}
 function store(a){try{localStorage.setItem('snake_hs',JSON.stringify(a))}catch(e){}}
 let scores=load();
 const best=()=>scores.length?scores[0].s:0;
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
 function show(h){ov.innerHTML=h;ov.style.display='flex'}
 function hide(){ov.style.display='none'}
 function hud(){document.getElementById('sc').textContent='SCORE '+score;document.getElementById('hi').textContent='HI '+Math.max(best(),score)}
 function title(){run=false;clearInterval(tm);score=0;hud();
-show('<h1>SNAKE</h1><button class="b" onclick="start()">PLAY</button><button class="b" onclick="board()">HIGH SCORES</button>')}
-function board(back){let rows='';for(let i=0;i<10;i++){const e=scores[i];rows+=`<tr><td>${i+1}.</td><td>${e?e.n:'---'}</td><td>${e?e.s:'0'}</td></tr>`}
-show('<div>TOP 10</div><table>'+rows+'</table><button class="b" onclick="title()">BACK</button>')}
-function start(){hide();snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};q=[];score=0;saved=false;place();run=true;hud();clearInterval(tm);tm=setInterval(step,speed());draw()}
+show('<div style="font-size:38px">🐍🍎</div><h1>SNAKE</h1><button class="b g" onclick="start()">PLAY</button><button class="b p" onclick="board()">HIGH SCORES</button>')}
+function board(){const cols=['#ffd700','#d8d8e8','#e0904a'];let rows='';
+for(let i=0;i<10;i++){const e=scores[i],c=cols[i]||'#38e8ff';rows+=`<tr style="color:${c}"><td>${i+1}.</td><td>${e?e.n:'---'}</td><td>${e?e.s:'0'}</td></tr>`}
+show('<h1 style="font-size:16px">TOP 10</h1><table>'+rows+'</table><button class="b o" onclick="title()">BACK</button>')}
+function start(){hide();snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};q=[];score=0;dead=false;parts=[];fruit=0;place();run=true;hud();clearInterval(tm);tm=setInterval(step,speed())}
 const speed=()=>Math.max(200,280-Math.floor(score/50)*4);
 function place(){do{food={x:Math.floor(Math.random()*C),y:Math.floor(Math.random()*R)}}while(snake.some(s=>s.x==food.x&&s.y==food.y))}
 function turn(x,y){if(!run)return;const l=q.length?q[q.length-1]:dir;if(l.x==-x&&l.y==-y||l.x==x&&l.y==y)return;if(q.length<3)q.push({x,y})}
 function step(){if(q.length)dir=q.shift();const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 if(h.x<0||h.y<0||h.x>=C||h.y>=R||snake.some(s=>s.x==h.x&&s.y==h.y))return over();
-snake.unshift(h);if(h.x==food.x&&h.y==food.y){score+=10;hud();place();clearInterval(tm);tm=setInterval(step,speed())}else snake.pop();draw()}
+snake.unshift(h);
+if(h.x==food.x&&h.y==food.y){score+=10;hud();buzz(15);
+for(let i=0;i<12;i++)parts.push({x:(food.x+.5)*S,y:(food.y+.5)*S,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,l:1,c:FRUIT[fruit%5]});
+fruit++;place();clearInterval(tm);tm=setInterval(step,speed())}else snake.pop()}
 function qualifies(){return score>0&&(scores.length<10||score>scores[scores.length-1].s)}
-function over(){run=false;clearInterval(tm);draw();
-let e=qualifies()?'<div>NEW HIGH SCORE!</div><input id="nm" maxlength="3" placeholder="AAA" autocomplete="off"><button class="b" id="sv" onclick="save()">SAVE</button>':'';
-show('<h1 style="font-size:16px">GAME OVER</h1><div>SCORE '+score+'</div>'+e+'<button class="b" onclick="start()">TRY AGAIN</button><button class="b" onclick="exitApp()">EXIT</button>')}
+function over(){run=false;dead=true;clearInterval(tm);buzz(120);
+const e=qualifies()?'<div style="color:#ffe14d">NEW HIGH SCORE!</div><input id="nm" maxlength="3" placeholder="AAA" autocomplete="off"><button class="b p" id="sv" onclick="save()">SAVE</button>':'';
+setTimeout(()=>show('<h1 style="font-size:18px">GAME OVER</h1><div style="color:#38e8ff">SCORE '+score+'</div>'+e+'<button class="b g" onclick="start()">TRY AGAIN</button><button class="b r" onclick="exitApp()">EXIT</button>'),450)}
 function save(){const n=(document.getElementById('nm').value||'AAA').toUpperCase().slice(0,3);scores.push({n,s:score});scores.sort((a,b)=>b.s-a.s);scores=scores.slice(0,10);store(scores);
 document.getElementById('nm').remove();document.getElementById('sv').remove();hud()}
 function exitApp(){try{const a=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(a){a.exitApp();return}}catch(e){}title();try{window.close()}catch(e){}}
-function px(x,y,s,f){const p=2;g.fillStyle=f;g.fillRect(x*S+p,y*S+p,S-p*2,S-p*2)}
-function draw(){g.clearRect(0,0,cv.width,cv.height);
-for(let y=0;y<R;y++)for(let x=0;x<C;x++)px(x,y,S,GH);
+const col=i=>`hsl(${(tick*5+i*16)%360},85%,58%)`;
+const circ=(x,y,r,f)=>{g.fillStyle=f;g.beginPath();g.arc(x,y,r,0,7);g.fill()};
+function draw(){
+g.fillStyle='#0b0b18';g.fillRect(0,0,360,400);
+g.fillStyle='#12122a';for(let y=0;y<R;y++)for(let x=0;x<C;x++)if((x+y)%2)g.fillRect(x*S,y*S,S,S);
 if(!snake)return;
-snake.forEach((s,i)=>{g.fillStyle=INK;g.fillRect(s.x*S+1,s.y*S+1,S-2,S-2);g.clearRect(s.x*S+5,s.y*S+5,S-10,S-10);g.fillRect(s.x*S+7,s.y*S+7,S-14,S-14)});
-const h=snake[0];g.fillStyle=INK;g.fillRect(h.x*S+1,h.y*S+1,S-2,S-2);
-if(food&&(blink||!run)){const f=food,m=S/2;g.fillStyle=INK;[[0,-8],[0,8],[-8,0],[8,0]].forEach(d=>g.fillRect(f.x*S+m-3+d[0]*.6,f.y*S+m-3+d[1]*.6,6,6))}}
-setInterval(()=>{blink^=1;if(run)draw()},250);
+if(food){const fx=(food.x+.5)*S,fy=(food.y+.5)*S,r=8+Math.sin(tick*.5)*1.2,c=FRUIT[fruit%5];
+circ(fx,fy,r+3,c+'33');circ(fx,fy+1,r,c);circ(fx-3,fy-3,2.5,'#ffffffcc');
+g.strokeStyle='#7a4a1a';g.lineWidth=2;g.beginPath();g.moveTo(fx,fy-r+1);g.lineTo(fx+1,fy-r-3);g.stroke();
+g.fillStyle='#3bd16f';g.beginPath();g.ellipse(fx+4,fy-r-2,4,2,-.5,0,7);g.fill()}
+const n=snake.length,P=s=>[(s.x+.5)*S,(s.y+.5)*S];
+g.lineCap='round';
+for(let i=n-1;i>0;i--){const a=P(snake[i]),b=P(snake[i-1]);g.strokeStyle=col(i);g.lineWidth=Math.min(17,9+(n-1-i)*3);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}
+for(let i=1;i<n;i++){const a=P(snake[i]);circ(a[0]-3,a[1]-3,2.2,'#ffffff55')}
+const [hx,hy]=P(snake[0]);circ(hx,hy,11,col(0));circ(hx-3,hy-4,3,'#ffffff55');
+const px=-dir.y,py=dir.x;
+if(!dead&&tick%8<4){g.strokeStyle='#ff2d55';g.lineWidth=2;g.beginPath();g.moveTo(hx+dir.x*10,hy+dir.y*10);g.lineTo(hx+dir.x*16,hy+dir.y*16);
+g.moveTo(hx+dir.x*16,hy+dir.y*16);g.lineTo(hx+dir.x*19+px*3,hy+dir.y*19+py*3);g.moveTo(hx+dir.x*16,hy+dir.y*16);g.lineTo(hx+dir.x*19-px*3,hy+dir.y*19-py*3);g.stroke()}
+for(const k of[-1,1]){const ex=hx+dir.x*3+px*5*k,ey=hy+dir.y*3+py*5*k;circ(ex,ey,4.6,'#fff');
+if(dead){g.strokeStyle='#000';g.lineWidth=1.6;g.beginPath();g.moveTo(ex-2.5,ey-2.5);g.lineTo(ex+2.5,ey+2.5);g.moveTo(ex+2.5,ey-2.5);g.lineTo(ex-2.5,ey+2.5);g.stroke()}
+else circ(ex+dir.x*1.6,ey+dir.y*1.6,2.3,'#111')}
+for(const p of parts){g.globalAlpha=Math.max(p.l,0);circ(p.x,p.y,3,p.c)}g.globalAlpha=1}
+setInterval(()=>{tick++;parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.l-=.06});parts=parts.filter(p=>p.l>0);draw()},70);
 // controls
-document.getElementById('u').onclick=()=>turn(0,-1);document.getElementById('d').onclick=()=>turn(0,1);
-document.getElementById('l').onclick=()=>turn(-1,0);document.getElementById('r').onclick=()=>turn(1,0);
-for(const id of['u','d','l','r'])document.getElementById(id).addEventListener('touchstart',e=>{e.preventDefault();document.getElementById(id).click()},{passive:false});
+const dirs={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
+for(const id in dirs){const b=document.getElementById(id);
+b.addEventListener('touchstart',e=>{e.preventDefault();turn(...dirs[id])},{passive:false});
+b.addEventListener('mousedown',()=>turn(...dirs[id]))}
 addEventListener('keydown',e=>{const k={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(k){e.preventDefault();turn(...k)}});
-let t0;const W=document.getElementById('wrap');
+let t0;const W=document.getElementById('stage');
 W.addEventListener('touchstart',e=>{t0=e.touches[0]},{passive:true});
 W.addEventListener('touchmove',e=>{if(!t0)return;const t=e.touches[0],dx=t.clientX-t0.clientX,dy=t.clientY-t0.clientY;
 if(Math.max(Math.abs(dx),Math.abs(dy))>22){Math.abs(dx)>Math.abs(dy)?turn(dx>0?1:-1,0):turn(0,dy>0?1:-1);t0=t}},{passive:true});
