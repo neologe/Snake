@@ -16,12 +16,13 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);display:flex;just
 #sc{color:var(--yellow)}#hi{color:var(--pink)}
 #stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 canvas{max-width:100%;max-height:100%;aspect-ratio:18/20;border:3px solid #7a3cff;border-radius:14px;box-shadow:0 0 18px #7a3cff99,inset 0 0 18px #7a3cff55;touch-action:none}
-#ov{position:absolute;inset:0;background:rgba(0,0,0,.84);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:14px;text-align:center;font-size:11px;line-height:1.7;border-radius:14px}
+#ov{position:absolute;inset:0;background:rgba(0,0,0,.84);display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;gap:12px;padding:14px;text-align:center;font-size:11px;line-height:1.7;border-radius:14px}
+#ov>:first-child{margin-top:auto}#ov>:last-child{margin-bottom:auto}
 #ov h1{font-size:24px;margin:0;background:linear-gradient(90deg,#ff3b3b,#ffe14d,#3bd16f,#38e8ff,#b45cff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .b{font:inherit;font-size:11px;color:#fff;border:0;border-radius:999px;padding:13px 18px;min-width:190px;cursor:pointer;text-shadow:0 2px 0 #0006;box-shadow:0 6px 0 var(--d),0 8px 14px #0008;background:linear-gradient(var(--l),var(--c))}
 .b:active{transform:translateY(5px);box-shadow:0 1px 0 var(--d)}
 .g{--l:#6dff9a;--c:#1fbf55;--d:#0e7a33}.o{--l:#ffc14d;--c:#ff8a00;--d:#a85500}.p{--l:#c98bff;--c:#8a3cff;--d:#531bb0}.r{--l:#ff7a7a;--c:#e62b2b;--d:#8f1313}
-table{width:100%;font-size:10px;border-collapse:collapse}td{padding:4px}td:last-child{text-align:right}
+table{width:100%;font-size:10px;border-collapse:collapse}td{padding:2px 4px}td:last-child{text-align:right}
 input{font:inherit;font-size:16px;width:6em;text-align:center;background:#111;border:3px solid var(--cyan);border-radius:10px;color:var(--cyan);padding:8px;text-transform:uppercase}
 #pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:4px;justify-content:center}
 #pad button{border:0;border-radius:50%;font-size:22px;color:#fff;text-shadow:0 2px 0 #0007;background:radial-gradient(circle at 35% 28%,var(--l),var(--c) 62%);box-shadow:0 6px 0 var(--d),0 0 0 3px #222,0 9px 12px #000a}
@@ -39,7 +40,7 @@ input{font:inherit;font-size:16px;width:6em;text-align:center;background:#111;bo
 <script>
 const C=18,R=20,S=20,cv=document.getElementById('cv'),g=cv.getContext('2d'),ov=document.getElementById('ov');
 const FRUIT=['#ff3b3b','#ff9f1c','#b45cff','#ffe14d','#3bd16f'];
-let snake,dir={x:1,y:0},q=[],food,score=0,tm,run=false,tick=0,dead=false,parts=[],fruit=0;
+let scr='title',snake,dir={x:1,y:0},q=[],food,score=0,tm,run=false,tick=0,dead=false,parts=[],fruit=0;
 function load(){try{const a=JSON.parse(localStorage.getItem('snake_hs'));return Array.isArray(a)?a:[]}catch(e){return[]}}
 function store(a){try{localStorage.setItem('snake_hs',JSON.stringify(a))}catch(e){}}
 let scores=load();
@@ -48,12 +49,12 @@ const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
 function show(h){ov.innerHTML=h;ov.style.display='flex'}
 function hide(){ov.style.display='none'}
 function hud(){document.getElementById('sc').textContent='SCORE '+score;document.getElementById('hi').textContent='HI '+Math.max(best(),score)}
-function title(){run=false;clearInterval(tm);score=0;hud();
+function title(){scr='title';run=false;clearInterval(tm);score=0;hud();
 show('<div style="font-size:38px">🐍🍎</div><h1>SNAKE</h1><button class="b g" onclick="start()">PLAY</button><button class="b p" onclick="board()">HIGH SCORES</button>')}
-function board(){const cols=['#ffd700','#d8d8e8','#e0904a'];let rows='';
+function board(){scr='board';const cols=['#ffd700','#d8d8e8','#e0904a'];let rows='';
 for(let i=0;i<10;i++){const e=scores[i],c=cols[i]||'#38e8ff';rows+=`<tr style="color:${c}"><td>${i+1}.</td><td>${e?e.n:'---'}</td><td>${e?e.s:'0'}</td></tr>`}
 show('<h1 style="font-size:16px">TOP 10</h1><table>'+rows+'</table><button class="b o" onclick="title()">BACK</button>')}
-function start(){hide();snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};q=[];score=0;dead=false;parts=[];fruit=0;place();run=true;hud();clearInterval(tm);tm=setInterval(step,speed())}
+function start(){scr='play';hide();snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};q=[];score=0;dead=false;parts=[];fruit=0;place();run=true;hud();clearInterval(tm);tm=setInterval(step,speed())}
 const speed=()=>Math.max(200,280-Math.floor(score/50)*4);
 function place(){do{food={x:Math.floor(Math.random()*C),y:Math.floor(Math.random()*R)}}while(snake.some(s=>s.x==food.x&&s.y==food.y))}
 function turn(x,y){if(!run)return;const l=q.length?q[q.length-1]:dir;if(l.x==-x&&l.y==-y||l.x==x&&l.y==y)return;if(q.length<3)q.push({x,y})}
@@ -64,7 +65,7 @@ if(h.x==food.x&&h.y==food.y){score+=10;hud();buzz(15);
 for(let i=0;i<12;i++)parts.push({x:(food.x+.5)*S,y:(food.y+.5)*S,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,l:1,c:FRUIT[fruit%5]});
 fruit++;place();clearInterval(tm);tm=setInterval(step,speed())}else snake.pop()}
 function qualifies(){return score>0&&(scores.length<10||score>scores[scores.length-1].s)}
-function over(){run=false;dead=true;clearInterval(tm);buzz(120);
+function over(){scr='over';run=false;dead=true;clearInterval(tm);buzz(120);
 const e=qualifies()?'<div style="color:#ffe14d">NEW HIGH SCORE!</div><input id="nm" maxlength="3" placeholder="AAA" autocomplete="off"><button class="b p" id="sv" onclick="save()">SAVE</button>':'';
 setTimeout(()=>show('<h1 style="font-size:18px">GAME OVER</h1><div style="color:#38e8ff">SCORE '+score+'</div>'+e+'<button class="b g" onclick="start()">TRY AGAIN</button><button class="b r" onclick="exitApp()">EXIT</button>'),450)}
 function save(){const n=(document.getElementById('nm').value||'AAA').toUpperCase().slice(0,3);scores.push({n,s:score});scores.sort((a,b)=>b.s-a.s);scores=scores.slice(0,10);store(scores);
@@ -103,5 +104,6 @@ let t0;const W=document.getElementById('stage');
 W.addEventListener('touchstart',e=>{t0=e.touches[0]},{passive:true});
 W.addEventListener('touchmove',e=>{if(!t0)return;const t=e.touches[0],dx=t.clientX-t0.clientX,dy=t.clientY-t0.clientY;
 if(Math.max(Math.abs(dx),Math.abs(dy))>22){Math.abs(dx)>Math.abs(dy)?turn(dx>0?1:-1,0):turn(0,dy>0?1:-1);t0=t}},{passive:true});
+try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{if(scr=='title')exitApp();else if(scr!='play')title()})}catch(e){}
 draw();title();
 </script></body></html>
